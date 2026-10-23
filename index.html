@@ -56,6 +56,24 @@ h1{font-size:clamp(60px,6.3vw,116px);font-weight:560;letter-spacing:-.075em;line
 @media(max-width:920px){.topbar{grid-template-columns:1fr;gap:12px}.nav-shell{justify-self:start}.status-card{justify-self:start;min-width:unset}.hero-copy{max-width:560px}}
 @media(max-width:700px){main{padding:0 0 22px}.hero{min-height:400px;height:58vh;border-radius:0}.topbar{left:5%;right:5%;top:20px;gap:10px}.identity{font-size:18px}.identity-icon{width:24px;height:24px;font-size:13px}.nav button{font-size:12px;padding:8px 11px}.status-card{padding:11px 13px;border-radius:16px}.time{font-size:24px}.time-tamil{font-size:12px}.hero-copy{left:6%;bottom:10.8%}.date{font-size:11px}.date-tamil{font-size:13px}.tamil-chip{font-size:12px;padding:9px 12px}h1{font-size:50px}.tagline{font-size:15px}.section{margin:24px 14px 0}.section-top h2{font-size:21px}.section-help{display:none}.tile-wrap{flex-basis:147px;width:147px}.tile{height:106px;border-radius:22px}.icon-plate{width:72px;height:72px;border-radius:20px}.brand-image{width:52px;height:50px}.brand-text{font-size:22px}.brand-text.small{font-size:18px}.bottom{margin:20px 15px 0}.desktop-hint{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* TV browser pointer navigation: the VIDAA browser may consume directional keys. */
+.tile:hover,.tile:focus-visible{
+  border-color:rgba(255,255,255,.95);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 0 2px rgba(255,255,255,.68),0 18px 36px rgba(0,0,0,.30);
+  transform:scale(1.045);
+}
+.quicknav{position:fixed;z-index:12;bottom:16px;right:20px;display:flex;gap:3px;
+  padding:6px;background:rgba(24,31,44,.94);border:1px solid rgba(255,255,255,.22);
+  border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;transition:opacity .12s ease}
+.quicknav.shown{opacity:1;pointer-events:auto}
+.quicknav button{border:0;border-radius:13px;background:transparent;color:#e7ebf3;
+  padding:12px 14px;font-size:14px;cursor:pointer;white-space:nowrap}
+.quicknav button:hover,.quicknav button:focus{background:rgba(255,255,255,.19);
+  outline:1px solid rgba(255,255,255,.8);outline-offset:0}
+@media(max-width:700px){.quicknav{bottom:8px;right:8px}.quicknav button{padding:9px 10px;font-size:12px}}
+
 </style>
 </head>
 <body>
@@ -125,6 +143,12 @@ h1{font-size:clamp(60px,6.3vw,116px);font-weight:560;letter-spacing:-.075em;line
 <div class="bottom"><span>HomeOS Cinema Edition · Personal dashboard</span><span class="desktop-hint">← → Browse · ↑ ↓ Sections · OK Open · Back Return</span></div>
 </main>
 
+<div class="quicknav" id="quicknav" aria-label="Quick section navigation">
+  <button type="button" data-jump="hero">Top</button>
+  <button type="button" data-jump="your-apps">Apps</button>
+  <button type="button" data-jump="tamil-india">Tamil</button>
+  <button type="button" data-jump="your-bookmarks">Links</button>
+</div>
 <div class="overlay" id="overlay" aria-hidden="true"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title"><h3 id="panel-title">Shortcut</h3><p id="panel-note"></p><input id="edit-url" type="url" placeholder="https://example.com" aria-label="Website URL" style="display:none"><div class="actions"><button id="cancel">Close</button><button id="save" class="primary" style="display:none">Save bookmark</button></div></div></div>
 
 <script>
@@ -162,6 +186,17 @@ var tiles=document.querySelectorAll('.tile');for(var i=0;i<tiles.length;i++){
  };})(tiles[i]);}
 save.onclick=function(){if(!chosen)return;var u=input.value.replace(/^\s+|\s+$/g,'');if(!allowedURL(u)){note.textContent='Enter a complete HTTPS address, starting with https://';input.focus();return;}store(chosen,u);close();};
 var nav=document.querySelectorAll('[data-jump]');for(var j=0;j<nav.length;j++){nav[j].onclick=function(){var id=this.getAttribute('data-jump'),dest=id==='hero'?document.querySelector('.hero'):document.getElementById(id);if(dest){dest.scrollIntoView();if(id!=='hero'){var target=dest.querySelector('.tile');if(target)target.focus();}}};}
+
+/* Pointer-compatible shortcut rail: visible only after the hero has been scrolled past. */
+var quicknav=document.getElementById('quicknav');
+function syncQuicknav(){
+  if(!quicknav)return;
+  var y=window.pageYOffset||document.documentElement.scrollTop||0;
+  quicknav.className=y>210?'quicknav shown':'quicknav';
+}
+window.addEventListener('scroll',syncQuicknav,false);
+syncQuicknav();
+
 var all=document.querySelectorAll('.tile,.nav button,#cancel,#save,#edit-url');
 function move(src,key){var r=src.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,best=null,score=1e15;for(var k=0;k<all.length;k++){var el=all[k];if(el===src)continue;if(overlay.className.indexOf('open')>=0){if(el!==cancel&&el!==save&&el!==input)continue;if(el.style.display==='none')continue;}else{if(el===cancel||el===save||el===input)continue;}var s=el.getBoundingClientRect(),dx=s.left+s.width/2-cx,dy=s.top+s.height/2-cy;if(key===37&&dx>=-3||key===39&&dx<=3||key===38&&dy>=-3||key===40&&dy<=3)continue;var p=(key===37||key===39)?Math.abs(dx):Math.abs(dy),c=(key===37||key===39)?Math.abs(dy):Math.abs(dx);var v=p+c*2.1;if(v<score){best=el;score=v;}}if(best){best.focus();if(best.scrollIntoView)try{best.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){best.scrollIntoView();}}}
 document.addEventListener('keydown',function(event){event=event||window.event;var k=event.keyCode||event.which,a=document.activeElement;if(k===461||k===27||k===8&&a!==input){if(overlay.className.indexOf('open')>=0){event.preventDefault();close();}return;}
