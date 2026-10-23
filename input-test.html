@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HomeOS | VIDAA Input Test</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090d17;color:#f3f6fa;font-family:Arial,Helvetica,sans-serif;font-size:20px;padding:3vw}
+h1{font-size:36px;margin:8px 0 10px}p{color:#b9c6d8;margin:8px 0 24px}
+.grid{display:flex;gap:2vw;margin:24px 0}.target{background:#19334e;color:#fff;border:3px solid #6486a5;flex:1;padding:6vh 2vw;text-align:center;border-radius:22px;font-weight:bold;font-size:25px}
+.target:hover{background:#2e7bd0;border-color:white;transform:scale(1.025)}
+.target:focus,.target:active{background:#226ba9;border-color:#fff;outline:4px solid #fff}
+.metrics{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.metric{background:#182235;border:1px solid #3d5373;border-radius:14px;padding:14px 19px;min-width:160px}
+.n{font-size:38px;font-weight:bold;color:#8fe4c0;display:block}
+.label{font-size:15px;color:#bdc9dd}
+#last{margin:24px 0 0;background:#0c1424;border:1px solid #4b607a;border-radius:13px;padding:17px;color:#fff;min-height:64px;word-break:break-word}
+footer{font-size:17px;color:#b7c6d9;margin-top:22px}
+</style></head>
+<body>
+<h1>HomeOS · VIDAA input test</h1>
+<p>Move the purple TV pointer over each box without clicking. Then press OK on one box, and try remote arrow keys.</p>
+<div class="grid">
+<button class="target" id="a">ONE</button>
+<button class="target" id="b">TWO</button>
+<button class="target" id="c">THREE</button>
+</div>
+<div class="metrics">
+<div class="metric"><span class="n" id="moved">0</span><span class="label">Mouse moves</span></div>
+<div class="metric"><span class="n" id="hovered">0</span><span class="label">Mouse over / enter</span></div>
+<div class="metric"><span class="n" id="clicked">0</span><span class="label">Clicks / OK</span></div>
+<div class="metric"><span class="n" id="keys">0</span><span class="label">Keydown events</span></div>
+<div class="metric"><span class="n" id="focused">0</span><span class="label">Focus events</span></div>
+</div>
+<div id="last">Waiting for remote input...</div>
+<footer>Nothing is installed and no network information is collected. All counters stay on this TV.</footer>
+<script>
+(function(){
+var counts={moved:0,hovered:0,clicked:0,keys:0,focused:0};
+var last=document.getElementById("last");var previousTime=0;
+function show(n,message){counts[n]++;document.getElementById(n).textContent=counts[n];last.textContent=message;}
+document.addEventListener("mousemove",function(e){show("moved","mousemove at "+e.clientX+", "+e.clientY);},false);
+document.addEventListener("mouseover",function(e){if(e.target&&e.target.className&&String(e.target.className).indexOf("target")!==-1)show("hovered","mouseover: "+e.target.id);},false);
+document.addEventListener("mouseenter",function(e){if(e.target&&e.target.id)show("hovered","mouseenter: "+e.target.id);},true);
+document.addEventListener("click",function(e){var name=e.target&&e.target.id?e.target.id:"page";show("clicked","click on "+name);},false);
+document.addEventListener("keydown",function(e){show("keys","keydown keyCode="+(e.keyCode||e.which));},false);
+document.addEventListener("focus",function(e){if(e.target&&e.target.id)show("focused","focus: "+e.target.id);},true);
+})();
+</script>
+</body></html>
