@@ -6,6 +6,8 @@ HomeOS is a lightweight, browser-based dashboard built as an alternative startin
 
 The project began as an experiment in building a more personal television interface — one that prioritises simplicity, remote-control navigation, and direct access to frequently used services.
 
+![HomeOS dashboard — main interface and application shortcuts](homeos-preview.png)
+
 It runs as a static web application inside the VIDAA browser, without requiring a backend or modifying the television's firmware.
 
 ---
